@@ -24,14 +24,24 @@ def get_zillow_data():
         database = 'zillow'
         # This is the SQL query made to the database 
         query = '''
-                SELECT *
-                FROM properties_2017
-                WHERE propertylandusetypeid = 261;
+                SELECT prop.*, pred.logerror, pred.transactiondate, air.airconditioningdesc, arch.architecturalstyledesc, build.buildingclassdesc, heat.heatingorsystemdesc, 
+                landuse.propertylandusedesc, story.storydesc, construct.typeconstructiondesc
+                FROM properties_2017 prop
+                INNER JOIN (SELECT parcelid, Max(transactiondate) transactiondate FROM predictions_2017 GROUP BY parcelid) pred USING (parcelid)
+                JOIN predictions_2017 as pred USING (parcelid, transactiondate)
+                LEFT JOIN airconditioningtype air USING (airconditioningtypeid)
+                LEFT JOIN architecturalstyletype arch USING (architecturalstyletypeid)
+                LEFT JOIN buildingclasstype build USING (buildingclasstypeid)
+                LEFT JOIN heatingorsystemtype heat USING (heatingorsystemtypeid)
+                LEFT JOIN propertylandusetype landuse USING (propertylandusetypeid)
+                LEFT JOIN storytype story USING (storytypeid)
+                LEFT JOIN typeconstructiontype construct USING (typeconstructiontypeid)
+                WHERE prop.latitude IS NOT NULL AND prop.longitude IS NOT NULL
                 '''
 
         # Convert the SQL query result into a pandas dataframe
         # get_db_url is another function in this file
-        df = pd.read_sql(query, get_db_url(host,user, password, database))
+        df = pd.read_sql(query, get_db_url(host, user, password, database))
 
         # Write that dataframe to csv on local drive, so that I won't need to access the database later
         df.to_csv(zillow.csv)
