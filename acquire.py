@@ -37,6 +37,7 @@ def get_zillow_data():
                 LEFT JOIN storytype story USING (storytypeid)
                 LEFT JOIN typeconstructiontype construct USING (typeconstructiontypeid)
                 WHERE prop.latitude IS NOT NULL AND prop.longitude IS NOT NULL
+                LIMIT 1000
                 '''
 
         # Convert the SQL query result into a pandas dataframe
